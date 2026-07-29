@@ -1585,6 +1585,16 @@ if ('serviceWorker' in navigator) {
 
 // ---------- 初始渲染 ----------
 Xving.render();
+// 预置自选股票（首次使用时自动添加）
+if (DB.data.stocks.length === 0) {
+  ['002298', '002896', '000802'].forEach(code => {
+    DB.data.stocks.push({ id: DB.uid(), code, name: code, costPrice: 0, holding: 0, records: [] });
+  });
+  DB.save();
+  Stock.render();
+  // 自动获取股票名称和实时行情
+  setTimeout(() => Stock.refreshAll(), 1500);
+}
 // 启动财经新闻自动抓取定时器（每 30 分钟刷新一次）
 Caijing.startAutoFetch();
 // 如果已有数据，不自动抓取；首次使用时自动抓取一次
