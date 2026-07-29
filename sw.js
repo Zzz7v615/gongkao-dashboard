@@ -1,6 +1,6 @@
-// Service Worker - 人生管理计划工作台
+// Service Worker - 公考财经自律管理工作台
 // 实现离线缓存：首次访问后，无网络也能打开
-const CACHE_NAME = 'life-dashboard-v1';
+const CACHE_NAME = 'gongkao-dashboard-v2';
 const ASSETS = [
   './',
   './index.html',
