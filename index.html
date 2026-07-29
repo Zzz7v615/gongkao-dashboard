@@ -11,10 +11,6 @@
 <meta name="apple-mobile-web-app-title" content="公考自律台">
 <meta name="theme-color" content="#0071e3">
 <meta name="description" content="公考财经自律管理工作台 — 行测打卡、公基学习、时政笔记、财经汇总、股票看板，一站搞定">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -506,55 +502,46 @@
       </div>
     </section>
 
-    <!-- ===== 4. 每日财经新闻收集汇总 ===== -->
+    <!-- ===== 4. 每日财经新闻收集汇总（自动抓取） ===== -->
     <section class="page" id="page-caijing">
       <div class="page-header">
         <div class="page-title">每日财经新闻收集汇总</div>
-        <div class="page-sub">读懂市场，把握经济脉搏</div>
+        <div class="page-sub">自动抓取实时财经资讯 · 数据来源：华尔街见闻 / 36氪 / Google News</div>
       </div>
       <div class="stat-row">
-        <div class="stat-card accent-orange"><div class="label">本月资讯</div><div class="value" id="cjMonth">0<span class="unit">条</span></div></div>
-        <div class="stat-card accent-pink"><div class="label">重点标记</div><div class="value" id="cjMarked">0</div></div>
-        <div class="stat-card accent-green"><div class="label">本月浏览</div><div class="value" id="cjMonthDur">0<span class="unit">分</span></div></div>
-        <div class="stat-card accent-blue"><div class="label">今日浏览</div><div class="value" id="cjTodayDur">0<span class="unit">分</span></div></div>
+        <div class="stat-card accent-orange"><div class="label">今日抓取</div><div class="value" id="cjTodayCount">0<span class="unit">条</span></div></div>
+        <div class="stat-card accent-blue"><div class="label">总资讯数</div><div class="value" id="cjTotal">0<span class="unit">条</span></div></div>
+        <div class="stat-card accent-pink"><div class="label">已收藏</div><div class="value" id="cjFav">0</div></div>
+        <div class="stat-card accent-green"><div class="label">上次更新</div><div class="value" id="cjLastUpdate" style="font-size:14px">未更新</div></div>
       </div>
       <div class="card">
-        <div class="card-title">➕ 录入财经资讯</div>
-        <div class="form-row">
-          <input class="input" id="cjTitle" placeholder="资讯标题（如：央行宣布降准0.5个百分点）">
-          <select class="select" id="cjCat" style="max-width:140px">
-            <option value="大盘">大盘</option>
-            <option value="行业政策">行业政策</option>
-            <option value="经济数据">经济数据</option>
-          </select>
+        <div class="card-title" style="justify-content:space-between">
+          <span>📡 实时财经新闻</span>
+          <div style="display:flex;gap:8px">
+            <select class="select" id="cjSourceFilter" onchange="Caijing.render()" style="padding:5px 10px;font-size:12px;max-width:130px">
+              <option value="all">全部来源</option>
+              <option value="华尔街见闻">华尔街见闻</option>
+              <option value="36氪快讯">36氪快讯</option>
+              <option value="经济数据">经济数据</option>
+              <option value="国际财经">国际财经</option>
+            </select>
+            <button class="btn orange small" id="cjRefreshBtn" onclick="Caijing.fetchAll()">🔄 刷新新闻</button>
+          </div>
         </div>
-        <div class="form-row">
-          <textarea class="input" id="cjContent" placeholder="资讯内容摘要..."></textarea>
-        </div>
-        <div class="form-row">
-          <input class="input" id="cjDur" type="number" placeholder="浏览时长（分钟）" min="0" style="max-width:140px">
-          <label style="font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:4px;cursor:pointer">
-            <input type="checkbox" id="cjMark"> 重点
-          </label>
-          <button class="btn orange" onclick="Caijing.add()">添加</button>
-        </div>
+        <div class="section-tip" id="cjFetchStatus">点击「刷新新闻」自动抓取最新财经资讯</div>
+        <div id="cjNewsList" style="max-height:520px;overflow-y:auto"></div>
       </div>
       <div class="card">
-        <div class="card-title">📊 月度财经资讯看板</div>
-        <div style="position:relative;height:240px"><canvas id="cjChart"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">📋 财经资讯列表</div>
-        <div class="tag-list" id="cjFilter" style="margin-bottom:12px"></div>
-        <div id="cjList" style="max-height:400px;overflow-y:auto"></div>
+        <div class="card-title">⭐ 我的收藏财经资讯</div>
+        <div id="cjFavList" style="max-height:300px;overflow-y:auto"></div>
       </div>
     </section>
 
-    <!-- ===== 5. 股票涨跌跟踪看板 ===== -->
+    <!-- ===== 5. 股票涨跌跟踪看板（自动行情） ===== -->
     <section class="page" id="page-stock">
       <div class="page-header">
         <div class="page-title">股票涨跌跟踪看板</div>
-        <div class="page-sub" id="stockDate"></div>
+        <div class="page-sub" id="stockDate">实时行情 · 数据来源：东方财富</div>
       </div>
       <div class="stat-row">
         <div class="stat-card accent-blue"><div class="label">自选股</div><div class="value" id="stCount">0<span class="unit">只</span></div></div>
@@ -563,17 +550,27 @@
         <div class="stat-card accent-pink"><div class="label">总盈亏</div><div class="value" id="stPnl">¥0</div></div>
       </div>
       <div class="card">
-        <div class="card-title">➕ 添加自选股票</div>
+        <div class="card-title" style="justify-content:space-between">
+          <span>➕ 添加自选股票</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn green small" id="stRefreshBtn" onclick="Stock.refreshAll()">🔄 刷新行情</button>
+          </div>
+        </div>
         <div class="form-row">
           <input class="input" id="stCode" placeholder="股票代码（如：600519）">
-          <input class="input" id="stName" placeholder="名称（如：贵州茅台）">
+          <input class="input" id="stName" placeholder="名称（可留空，自动获取）">
           <input class="input" id="stCostPrice" type="number" step="0.01" placeholder="持仓成本价" min="0" style="max-width:130px">
           <input class="input" id="stHolding" type="number" placeholder="持仓数量" min="0" style="max-width:120px">
           <button class="btn green" onclick="Stock.add()">添加</button>
         </div>
+        <div class="section-tip" id="stRefreshStatus">添加股票后点击「刷新行情」自动获取实时价格和涨跌幅</div>
+      </div>
+      <div class="card" id="stAnalysisCard" style="display:none">
+        <div class="card-title">🤖 AI 持仓分析报告</div>
+        <div id="stAnalysis" style="font-size:13px;line-height:1.7"></div>
       </div>
       <div class="card">
-        <div class="card-title">💰 持仓股票与每日记录</div>
+        <div class="card-title">💰 持仓股票与行情</div>
         <div id="stList"></div>
       </div>
       <div class="card">
@@ -600,7 +597,7 @@
     <span class="ex-chip" onclick="AI.fill('学了民法典继承编45分钟已掌握')">公基学习</span>
     <span class="ex-chip" onclick="AI.fill('中央经济工作会议召开重点考点')">时政录入</span>
     <span class="ex-chip" onclick="AI.fill('央行降准0.5个百分点大盘利好')">财经资讯</span>
-    <span class="ex-chip" onclick="AI.fill('贵州茅台收盘1700涨2%')">股票记录</span>
+    <span class="ex-chip" onclick="AI.fill('刷新股票行情查看持仓分析')">刷新股票</span>
   </div>
 </div>
 
@@ -909,109 +906,299 @@ const Shizheng = {
 };
 
 /* =================================================================
-   4. 每日财经新闻收集汇总 Caijing
+   4. 每日财经新闻收集汇总 Caijing（自动抓取 RSS）
+   数据源：RSSHub + rss2json 代理（支持 CORS，GitHub Pages 可直接调用）
    ================================================================= */
 const Caijing = {
-  cats: ['大盘','行业政策','经济数据'],
-  catColors: {'大盘':'#ff9500','行业政策':'#0071e3','经济数据':'#34c759'},
-  filter: 'all',
-  setFilter(f) { this.filter = f; this.render(); },
-  add() {
-    const title = $('cjTitle').value.trim();
-    if (!title) { toast('请输入资讯标题'); return; }
-    DB.data.caijing.push({
-      id: DB.uid(),
-      title,
-      cat: $('cjCat').value,
-      content: $('cjContent').value.trim(),
-      dur: parseInt($('cjDur').value) || 0,
-      marked: $('cjMark').checked,
-      date: todayStr()
-    });
-    $('cjTitle').value = ''; $('cjContent').value = ''; $('cjDur').value = ''; $('cjMark').checked = false;
-    DB.save(); this.render();
-    toast('财经资讯已录入');
+  // RSS 源配置：name -> {rssUrl, source, color}
+  sources: [
+    { name:'华尔街见闻', source:'华尔街见闻', color:'#0071e3',
+      rssUrl:'https://rsshub.rssforever.com/wallstreetcn/news/global' },
+    { name:'36氪快讯', source:'36氪快讯', color:'#ff9500',
+      rssUrl:'https://rsshub.rssforever.com/36kr/newsflashes' },
+    { name:'经济数据', source:'经济数据', color:'#34c759',
+      rssUrl:'https://news.google.com/rss/search?q=%E7%BB%8F%E6%B5%8E%E6%95%B0%E6%8D%AE&hl=zh-CN&gl=CN&ceid=CN:zh-Hans' },
+    { name:'国际财经', source:'国际财经', color:'#af52de',
+      rssUrl:'https://news.google.com/rss/search?q=site:reuters.com+business&hl=zh-CN&gl=CN&ceid=CN:zh-Hans' }
+  ],
+  fetching: false,
+  autoTimer: null,
+
+  // 通过 rss2json 代理抓取单个 RSS 源
+  async fetchOne(src) {
+    const apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(src.rssUrl);
+    try {
+      const resp = await fetch(apiUrl);
+      const data = await resp.json();
+      if (data.status !== 'ok' || !data.items) return [];
+      return data.items.map(item => ({
+        id: DB.uid(),
+        title: item.title || '(无标题)',
+        link: item.link || '',
+        source: src.source,
+        color: src.color,
+        pubDate: item.pubDate || '',
+        desc: (item.description || '').replace(/<[^>]+>/g, '').slice(0, 200),
+        date: todayStr(),
+        fav: false,
+        fetchedAt: new Date().toISOString()
+      }));
+    } catch(e) {
+      console.log('fetch fail:', src.name, e);
+      return [];
+    }
   },
-  toggleMark(id) { const c = DB.data.caijing.find(x=>x.id===id); if (c) { c.marked = !c.marked; DB.save(); this.render(); } },
+
+  // 抓取所有源
+  async fetchAll() {
+    if (this.fetching) { toast('正在抓取中，请稍候...'); return; }
+    this.fetching = true;
+    const btn = $('cjRefreshBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ 抓取中...'; }
+    $('cjFetchStatus').textContent = '正在从 ' + this.sources.length + ' 个源抓取最新财经新闻...';
+    
+    const all = await Promise.all(this.sources.map(s => this.fetchOne(s)));
+    let newItems = [];
+    all.forEach(items => newItems = newItems.concat(items));
+    
+    // 去重：基于标题
+    const existingTitles = new Set(DB.data.caijing.map(x => x.title));
+    const fresh = newItems.filter(it => !existingTitles.has(it.title));
+    
+    // 保留最近 200 条，避免无限增长
+    DB.data.caijing = [...fresh, ...DB.data.caijing].slice(0, 200);
+    DB.data.meta = DB.data.meta || {};
+    DB.data.meta.cjLastUpdate = new Date().toISOString();
+    DB.save();
+    
+    this.fetching = false;
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 刷新新闻'; }
+    $('cjFetchStatus').textContent = `✅ 抓取完成：本次新增 ${fresh.length} 条，共 ${DB.data.caijing.length} 条 · 上次更新 ${new Date(DB.data.meta.cjLastUpdate).toLocaleString('zh-CN')}`;
+    this.render();
+    toast(fresh.length > 0 ? `抓取成功，新增 ${fresh.length} 条财经新闻` : '已抓取，无新增内容');
+  },
+
+  toggleFav(id) {
+    const c = DB.data.caijing.find(x=>x.id===id);
+    if (c) { c.fav = !c.fav; DB.save(); this.render(); }
+  },
   del(id) { DB.data.caijing = DB.data.caijing.filter(x => x.id !== id); DB.save(); this.render(); },
-  chart: null,
-  render() {
-    const now = new Date();
-    const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const monthData = DB.data.caijing.filter(x => x.date.startsWith(ym));
-    $('cjMonth').innerHTML = monthData.length + '<span class="unit">条</span>';
-    $('cjMarked').textContent = DB.data.caijing.filter(x => x.marked).length;
-    $('cjMonthDur').innerHTML = monthData.reduce((a,b)=>a+b.dur,0) + '<span class="unit">分</span>';
-    $('cjTodayDur').innerHTML = DB.data.caijing.filter(x => x.date === todayStr()).reduce((a,b)=>a+b.dur,0) + '<span class="unit">分</span>';
-    // chart - 本月各类别数量
-    const catCounts = this.cats.map(c => monthData.filter(x => x.cat === c).length);
-    if (this.chart) this.chart.destroy();
-    const ctx = $('cjChart').getContext('2d');
-    this.chart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: this.cats,
-        datasets: [{
-          data: catCounts,
-          backgroundColor: this.cats.map(c => this.catColors[c]),
-          borderWidth: 2, borderColor: '#fff'
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'right', labels: { font: { size: 12 }, padding: 10 } },
-          tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed} 条` } }
-        }
+
+  // 自动定时刷新：每 30 分钟抓取一次（仅当财经页激活时）
+  startAutoFetch() {
+    if (this.autoTimer) clearInterval(this.autoTimer);
+    this.autoTimer = setInterval(() => {
+      if (document.getElementById('page-caijing').classList.contains('active')) {
+        this.fetchAll();
       }
-    });
-    // filter
-    $('cjFilter').innerHTML = `<button class="tag-btn ${this.filter==='all'?'sel':''}" onclick="Caijing.setFilter('all')">全部</button>` +
-      this.cats.map(c => `<button class="tag-btn ${this.filter===c?'sel':''}" onclick="Caijing.setFilter('${c}')">${c}</button>`).join('') +
-      `<button class="tag-btn ${this.filter==='marked'?'sel':''}" onclick="Caijing.setFilter('marked')">⭐重点</button>`;
-    // list
-    const filtered = this.filter === 'all' ? DB.data.caijing :
-                     this.filter === 'marked' ? DB.data.caijing.filter(x => x.marked) :
-                     DB.data.caijing.filter(x => x.cat === this.filter);
-    const sorted = [...filtered].sort((a,b)=>b.date.localeCompare(a.date));
-    const list = $('cjList');
-    if (!sorted.length) list.innerHTML = '<div class="empty">还没有财经资讯</div>';
-    else list.innerHTML = sorted.map(c => `
-      <div class="kn-item">
-        <div class="k-head">
-          <div style="flex:1">
-            <div class="k-title">${c.marked?'⭐ ':''}<span class="badge-dot" style="background:${this.catColors[c.cat]};display:inline-block;margin-right:6px"></span>${escapeHtml(c.title)}</div>
-            <div class="k-meta">${c.cat} · ${fmtDate(c.date)} · 浏览${c.dur}分</div>
+    }, 30 * 60 * 1000); // 30 分钟
+  },
+
+  render() {
+    const all = DB.data.caijing;
+    const today = todayStr();
+    const todayCount = all.filter(x => x.date === today).length;
+    $('cjTodayCount').innerHTML = todayCount + '<span class="unit">条</span>';
+    $('cjTotal').innerHTML = all.length + '<span class="unit">条</span>';
+    $('cjFav').textContent = all.filter(x => x.fav).length;
+    
+    const lastUpdate = DB.data.meta && DB.data.meta.cjLastUpdate;
+    $('cjLastUpdate').textContent = lastUpdate ? new Date(lastUpdate).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}) : '未更新';
+
+    // 来源过滤
+    const sourceFilter = $('cjSourceFilter') ? $('cjSourceFilter').value : 'all';
+    const filtered = sourceFilter === 'all' ? all : all.filter(x => x.source === sourceFilter);
+    
+    // 新闻列表（按时间倒序，只看最近的）
+    const sorted = [...filtered].sort((a,b) => (b.fetchedAt||'').localeCompare(a.fetchedAt||''));
+    const list = $('cjNewsList');
+    if (!sorted.length) {
+      list.innerHTML = '<div class="empty">暂无新闻，点击右上角「刷新新闻」自动抓取</div>';
+    } else {
+      list.innerHTML = sorted.slice(0, 60).map(c => `
+        <div class="news-item" style="display:flex;gap:10px;padding:12px;border-bottom:1px solid var(--border)">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+              <span class="pill" style="background:${c.color}22;color:${c.color}">${c.source}</span>
+              ${c.pubDate ? `<span style="font-size:11px;color:var(--text-3)">${this.fmtPubDate(c.pubDate)}</span>` : ''}
+              ${c.fav ? '<span style="font-size:11px">⭐</span>' : ''}
+            </div>
+            <div style="font-weight:500;line-height:1.4;margin-bottom:4px">${escapeHtml(c.title)}</div>
+            ${c.desc ? `<div style="font-size:12px;color:var(--text-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtml(c.desc)}</div>` : ''}
+            <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+              ${c.link ? `<a href="${c.link}" target="_blank" rel="noopener" style="font-size:12px;color:var(--blue);text-decoration:none">阅读原文 →</a>` : ''}
+              <button class="btn sec small" onclick="Caijing.toggleFav('${c.id}')">${c.fav?'取消收藏':'收藏'}</button>
+              <button class="btn sec small" onclick="Caijing.del('${c.id}')">删</button>
+            </div>
           </div>
-          <button class="btn sec small" onclick="Caijing.toggleMark('${c.id}')">${c.marked?'取消重点':'重点'}</button>
-          <button class="btn sec small" onclick="Caijing.del('${c.id}')">删</button>
-        </div>
-        ${c.content ? `<div class="k-note">${escapeHtml(c.content)}</div>` : ''}
-      </div>`).join('');
+        </div>`).join('');
+    }
+
+    // 收藏列表
+    const favs = all.filter(x => x.fav).sort((a,b) => (b.fetchedAt||'').localeCompare(a.fetchedAt||''));
+    const favList = $('cjFavList');
+    if (!favs.length) {
+      favList.innerHTML = '<div class="empty">还没有收藏的新闻</div>';
+    } else {
+      favList.innerHTML = favs.map(c => `
+        <div class="list-item">
+          <span class="pill" style="background:${c.color}22;color:${c.color}">${c.source}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(c.title)}</div>
+            <div style="font-size:12px;color:var(--text-2)">${this.fmtPubDate(c.pubDate)}</div>
+          </div>
+          ${c.link ? `<a href="${c.link}" target="_blank" rel="noopener" style="font-size:12px;color:var(--blue);text-decoration:none">查看</a>` : ''}
+          <button class="btn sec small" onclick="Caijing.toggleFav('${c.id}')">取消</button>
+        </div>`).join('');
+    }
+  },
+  fmtPubDate(d) {
+    try {
+      const x = new Date(d);
+      const now = new Date();
+      const diff = (now - x) / 1000;
+      if (diff < 60) return '刚刚';
+      if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+      if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+      return fmtDate(d);
+    } catch { return ''; }
   }
 };
 
 /* =================================================================
-   5. 股票涨跌跟踪看板 Stock
+   5. 股票涨跌跟踪看板 Stock（自动行情 + AI 分析）
+   数据源：东方财富 push2 API（支持 CORS，浏览器可直接 fetch）
    ================================================================= */
 const Stock = {
+  // 东方财富 secid 前缀：沪市=1，深市=0
+  getSecId(code) {
+    if (/^(6|9|7)/.test(code)) return '1.' + code;  // 沪市
+    if (/^(0|2|3)/.test(code)) return '0.' + code;  // 深市
+    return '1.' + code; // 默认沪市
+  },
   add() {
-    const code = $('stCode').value.trim();
-    const name = $('stName').value.trim();
-    const costPrice = parseFloat($('stCostPrice').value);
-    const holding = parseInt($('stHolding').value);
-    if (!code || !name) { toast('请输入代码和名称'); return; }
+    let code = $('stCode').value.trim();
+    let name = $('stName').value.trim();
+    if (!code) { toast('请输入股票代码'); return; }
     if (DB.data.stocks.some(s => s.code === code)) { toast('该股票已存在'); return; }
     DB.data.stocks.push({
       id: DB.uid(),
-      code, name,
-      costPrice: costPrice || 0,
-      holding: holding || 0,
+      code, name: name || code,
+      costPrice: parseFloat($('stCostPrice').value) || 0,
+      holding: parseInt($('stHolding').value) || 0,
       records: []
     });
     $('stCode').value = ''; $('stName').value = ''; $('stCostPrice').value = ''; $('stHolding').value = '';
     DB.save(); this.render();
-    toast('股票已添加');
+    toast('股票已添加，点击「刷新行情」获取实时价格');
+    // 如果名称为空，自动获取
+    if (!name) this.refreshAll();
+  },
+  // 一键刷新所有自选股实时行情
+  async refreshAll() {
+    if (!DB.data.stocks.length) { toast('请先添加自选股票'); return; }
+    const btn = $('stRefreshBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ 刷新中...'; }
+    $('stRefreshStatus').textContent = '正在从东方财富获取实时行情...';
+    let updated = 0;
+    for (const s of DB.data.stocks) {
+      try {
+        const secid = this.getSecId(s.code);
+        const url = `https://push2.eastmoney.com/api/qt/stock/get?secid=${secid}&fields=f43,f44,f45,f46,f57,f58,f170&_=${Date.now()}`;
+        const resp = await fetch(url);
+        const json = await resp.json();
+        const d = json.data;
+        if (!d) continue;
+        const close = (d.f43 || 0) / 100;
+        const chg = (d.f170 || 0) / 100;
+        if (!close) continue;
+        // 更新股票名称（如果之前是空或代码）
+        if (d.f58 && (s.name === s.code || !s.name)) s.name = d.f58;
+        // 自动写入今日记录（如果今天还没记录或覆盖今天的）
+        const today = todayStr();
+        const existIdx = s.records.findIndex(r => r.date === today);
+        const pnl = (close - s.costPrice) * s.holding;
+        const rec = { date: today, close, chg: +chg.toFixed(2), pnl: +pnl.toFixed(2) };
+        if (existIdx >= 0) s.records[existIdx] = rec;
+        else s.records.push(rec);
+        updated++;
+      } catch(e) {
+        console.log('刷新失败:', s.code, e);
+      }
+    }
+    DB.data.meta = DB.data.meta || {};
+    DB.data.meta.stLastUpdate = new Date().toISOString();
+    DB.save();
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 刷新行情'; }
+    const updateTime = new Date(DB.data.meta.stLastUpdate).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+    $('stRefreshStatus').textContent = `✅ 已更新 ${updated} 只股票 · 上次刷新 ${updateTime}`;
+    this.render();
+    this.generateAnalysis();
+    toast(updated > 0 ? `行情已更新，共 ${updated} 只股票` : '刷新失败，请稍后重试');
+  },
+  // AI 持仓分析报告
+  generateAnalysis() {
+    const stocks = DB.data.stocks;
+    if (!stocks.length) { $('stAnalysisCard').style.display = 'none'; return; }
+    const analysis = [];
+    let totalCost = 0, totalValue = 0;
+    const stockInfos = [];
+    stocks.forEach(s => {
+      const lastRec = s.records.length ? s.records[s.records.length - 1] : null;
+      const curPrice = lastRec ? lastRec.close : s.costPrice;
+      const pnl = (curPrice - s.costPrice) * s.holding;
+      const pnlPct = s.costPrice ? ((curPrice - s.costPrice) / s.costPrice * 100) : 0;
+      totalCost += s.costPrice * s.holding;
+      totalValue += curPrice * s.holding;
+      stockInfos.push({ name: s.name, code: s.code, pnl, pnlPct, curPrice, costPrice: s.costPrice, holding: s.holding, chg: lastRec ? lastRec.chg : 0 });
+    });
+    const totalPnl = totalValue - totalCost;
+    const totalPnlPct = totalCost ? (totalPnl / totalCost * 100) : 0;
+    // 1. 总览
+    analysis.push(`<div style="background:${totalPnl>=0?'rgba(255,55,95,.08)':'rgba(52,199,89,.08)'};padding:12px;border-radius:10px;margin-bottom:10px">
+      <div style="font-weight:600;margin-bottom:4px">📊 持仓总览</div>
+      总市值 <b>${fmtMoney(totalValue)}</b> · 总成本 <b>${fmtMoney(totalCost)}</b> · 
+      总盈亏 <b style="color:${totalPnl>=0?'var(--pink)':'var(--green)'}">${totalPnl>=0?'+':''}${fmtMoney(totalPnl)} (${totalPnlPct>=0?'+':''}${totalPnlPct.toFixed(2)}%)</b>
+    </div>`);
+    // 2. 最强/最弱
+    if (stockInfos.length >= 2) {
+      const sorted = [...stockInfos].sort((a,b) => b.pnlPct - a.pnlPct);
+      const best = sorted[0], worst = sorted[sorted.length - 1];
+      analysis.push(`<div>🏆 <b>表现最强：</b>${best.name} ${best.pnlPct>=0?'+':''}${best.pnlPct.toFixed(2)}% (${best.pnl>=0?'+':''}${fmtMoney(best.pnl)})</div>`);
+      analysis.push(`<div>📉 <b>表现最弱：</b>${worst.name} ${worst.pnlPct>=0?'+':''}${worst.pnlPct.toFixed(2)}% (${worst.pnl>=0?'+':''}${fmtMoney(worst.pnl)})</div>`);
+    }
+    // 3. 持仓集中度
+    stockInfos.sort((a,b) => (b.curPrice * b.holding) - (a.curPrice * a.holding));
+    const topHolding = stockInfos[0];
+    const topPct = totalValue ? (topHolding.curPrice * topHolding.holding / totalValue * 100) : 0;
+    if (topPct > 50) {
+      analysis.push(`<div style="color:var(--orange)">⚠️ <b>持仓集中度风险：</b>${topHolding.name} 占总仓位 ${topPct.toFixed(0)}%，建议分散投资降低风险。</div>`);
+    } else {
+      analysis.push(`<div>✅ <b>仓位分布：</b>最大持仓 ${topHolding.name} 占比 ${topPct.toFixed(0)}%，分布较为均衡。</div>`);
+    }
+    // 4. 止盈止损建议
+    const takeProfit = stockInfos.filter(s => s.pnlPct >= 20);
+    const stopLoss = stockInfos.filter(s => s.pnlPct <= -10);
+    if (takeProfit.length) {
+      analysis.push(`<div style="color:var(--pink)">🎯 <b>止盈提醒：</b>${takeProfit.map(s => s.name + '(' + s.pnlPct.toFixed(0) + '%)').join('、')} 盈利较多，可考虑分批止盈。</div>`);
+    }
+    if (stopLoss.length) {
+      analysis.push(`<div style="color:var(--green)">🛡️ <b>止损提醒：</b>${stopLoss.map(s => s.name + '(' + s.pnlPct.toFixed(0) + '%)').join('、')} 亏损较多，关注是否需要止损。</div>`);
+    }
+    // 5. 今日行情
+    const todayUp = stockInfos.filter(s => s.chg > 0).length;
+    const todayDown = stockInfos.filter(s => s.chg < 0).length;
+    analysis.push(`<div>📈 <b>今日行情：</b>${todayUp} 涨 ${todayDown} 跸 ${stocks.length - todayUp - todayDown} 平</div>`);
+    // 6. 综合建议
+    if (totalPnlPct > 10) {
+      analysis.push(`<div style="background:rgba(175,82,222,.06);padding:8px;border-radius:8px;margin-top:8px"><b>💡 综合建议：</b>整体盈利良好，可适当获利了结部分仓位，落袋为安。</div>`);
+    } else if (totalPnlPct < -10) {
+      analysis.push(`<div style="background:rgba(175,82,222,.06);padding:8px;border-radius:8px;margin-top:8px"><b>💡 综合建议：</b>整体亏损较多，建议审视持仓逻辑，必要时调仓换股。</div>`);
+    } else {
+      analysis.push(`<div style="background:rgba(175,82,222,.06);padding:8px;border-radius:8px;margin-top:8px"><b>💡 综合建议：</b>整体表现平稳，继续关注市场动态，保持理性投资。</div>`);
+    }
+    $('stAnalysis').innerHTML = analysis.join('');
+    $('stAnalysisCard').style.display = 'block';
   },
   addRecord(id) {
     const s = DB.data.stocks.find(x => x.id === id);
@@ -1020,30 +1207,27 @@ const Stock = {
     if (!closeStr) return;
     const close = parseFloat(closeStr);
     if (!close || close <= 0) { toast('价格无效'); return; }
-    // 计算涨跌幅：对比上次记录或成本价
     const lastRecord = s.records.length ? s.records[s.records.length - 1] : null;
     const prevClose = lastRecord ? lastRecord.close : s.costPrice;
     const chg = prevClose ? ((close - prevClose) / prevClose * 100) : 0;
     const pnl = (close - s.costPrice) * s.holding;
     s.records.push({ date: todayStr(), close, chg: +chg.toFixed(2), pnl: +pnl.toFixed(2) });
-    DB.save(); this.render();
+    DB.save(); this.render(); this.generateAnalysis();
     toast('已记录今日收盘价');
   },
   del(id) {
     if (!confirm('确认删除该股票？')) return;
     DB.data.stocks = DB.data.stocks.filter(x => x.id !== id);
-    DB.save(); this.render();
+    DB.save(); this.render(); this.generateAnalysis();
   },
   delRecord(stockId, idx) {
     const s = DB.data.stocks.find(x => x.id === stockId);
-    if (s) { s.records.splice(idx, 1); DB.save(); this.render(); }
+    if (s) { s.records.splice(idx, 1); DB.save(); this.render(); this.generateAnalysis(); }
   },
   chart: null,
   render() {
     const stocks = DB.data.stocks;
-    $('stockDate').textContent = fmtFull(new Date());
     $('stCount').innerHTML = stocks.length + '<span class="unit">只</span>';
-    // 计算总成本、总市值
     let totalCost = 0, totalValue = 0;
     stocks.forEach(s => {
       totalCost += s.costPrice * s.holding;
@@ -1055,8 +1239,16 @@ const Stock = {
     $('stValue').textContent = fmtMoney(totalValue);
     const pnl = totalValue - totalCost;
     const pnlEl = $('stPnl');
-    pnlEl.textContent = (pnl >= 0 ? '+' : '') + fmtMoney(pnl).replace('¥', '¥');
+    pnlEl.textContent = (pnl >= 0 ? '+' : '') + fmtMoney(pnl);
     pnlEl.style.color = pnl >= 0 ? 'var(--pink)' : 'var(--green)';
+    // 上次更新时间
+    const lastUpdate = DB.data.meta && DB.data.meta.stLastUpdate;
+    if (lastUpdate && $('stRefreshStatus')) {
+      const t = new Date(lastUpdate).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+      if (!$('stRefreshStatus').textContent.includes('✅')) {
+        $('stRefreshStatus').textContent = `上次刷新：${t} · 点击「刷新行情」获取最新价格`;
+      }
+    }
     // list
     const list = $('stList');
     if (!stocks.length) {
@@ -1068,23 +1260,25 @@ const Stock = {
         const pnl = (curPrice - s.costPrice) * s.holding;
         const pnlPct = s.costPrice ? ((curPrice - s.costPrice) / s.costPrice * 100) : 0;
         const isUp = pnl >= 0;
+        const todayChg = lastRec && lastRec.date === todayStr() ? lastRec.chg : null;
         return `<div class="stock-item">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
             <div>
               <div style="font-weight:600;font-size:16px">${escapeHtml(s.name)} <span style="color:var(--text-2);font-weight:400;font-size:13px">${s.code}</span></div>
               <div style="font-size:12px;color:var(--text-2);margin-top:2px">
-                持仓 ${s.holding} 股 · 成本 ${s.costPrice.toFixed(2)} · 现价 ${curPrice.toFixed(2)}
+                持仓 ${s.holding} 股 · 成本 ${s.costPrice.toFixed(2)} · 现价 <b>${curPrice.toFixed(2)}</b>
+                ${todayChg !== null ? `<span class="${todayChg>=0?'stock-up':'stock-down'}" style="margin-left:6px">${todayChg>=0?'🔴':'🟢'} ${todayChg>=0?'+':''}${todayChg}%</span>` : ''}
               </div>
             </div>
             <div style="text-align:right">
-              <div class="${isUp?'stock-up':'stock-down'}" style="font-size:18px">${isUp?'+':''}${fmtMoney(pnl).replace('¥','¥')}</div>
+              <div class="${isUp?'stock-up':'stock-down'}" style="font-size:18px">${isUp?'+':''}${fmtMoney(pnl)}</div>
               <div class="${isUp?'stock-up':'stock-down'}" style="font-size:13px">${isUp?'+':''}${pnlPct.toFixed(2)}%</div>
             </div>
           </div>
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-            <button class="btn green small" onclick="Stock.addRecord('${s.id}')">+ 今日记录</button>
+            <button class="btn sec small" onclick="Stock.addRecord('${s.id}')">手动记录</button>
             <button class="btn sec small" onclick="Stock.del('${s.id}')">删除</button>
-            ${lastRec ? `<span class="pill" style="align-self:center">最近：${fmtDate(lastRec.date)} ${lastRec.close} (${lastRec.chg>=0?'+':''}${lastRec.chg}%)</span>` : '<span class="pill" style="align-self:center">尚无每日记录</span>'}
+            ${lastRec ? `<span class="pill" style="align-self:center">最近：${fmtDate(lastRec.date)} ${lastRec.close}</span>` : '<span class="pill" style="align-self:center">尚无记录，点刷新行情</span>'}
           </div>
           ${s.records.length ? `<div style="margin-top:10px;max-height:120px;overflow-y:auto;border-top:1px solid var(--border);padding-top:6px">
             ${s.records.slice().reverse().map((r,i) => {
@@ -1092,7 +1286,7 @@ const Stock = {
               return `<div class="list-item" style="padding:6px 0">
                 <div style="flex:1;font-size:12px">${fmtDate(r.date)} · 收盘 ${r.close.toFixed(2)}</div>
                 <div class="${r.chg>=0?'stock-up':'stock-down'}" style="font-size:12px">${r.chg>=0?'+':''}${r.chg}%</div>
-                <div class="${r.pnl>=0?'stock-up':'stock-down'}" style="font-size:12px;width:90px;text-align:right">${r.pnl>=0?'+':''}${fmtMoney(r.pnl).replace('¥','¥')}</div>
+                <div class="${r.pnl>=0?'stock-up':'stock-down'}" style="font-size:12px;width:90px;text-align:right">${r.pnl>=0?'+':''}${fmtMoney(r.pnl)}</div>
                 <span style="cursor:pointer;color:var(--text-3)" onclick="Stock.delRecord('${s.id}',${idx})">×</span>
               </div>`;
             }).join('')}
@@ -1100,7 +1294,9 @@ const Stock = {
         </div>`;
       }).join('');
     }
-    // chart - 本周个股每日涨跌幅
+    // 如果有数据，显示分析
+    if (stocks.length) this.generateAnalysis();
+    // chart
     const wDates = weekDates();
     const datasets = stocks.map((s, i) => {
       const colors = ['#0071e3','#34c759','#ff9500','#ff375f','#af52de','#5ac8fa','#5856d6'];
@@ -1109,14 +1305,7 @@ const Stock = {
         const rec = s.records.find(r => r.date === d);
         return rec ? rec.chg : null;
       });
-      return {
-        label: s.name,
-        data,
-        backgroundColor: color,
-        borderColor: color,
-        borderWidth: 1,
-        spanGaps: true
-      };
+      return { label: s.name, data, backgroundColor: color, borderColor: color, borderWidth: 1, spanGaps: true };
     });
     if (this.chart) this.chart.destroy();
     const ctx = $('stChart').getContext('2d');
@@ -1160,20 +1349,12 @@ const AI = {
         DB.data.shizheng.push({ id: DB.uid(), title: result.title, cat: result.cat || '会议', content: result.content||'', points: result.points||'', dur: result.dur||0, fav: result.fav||false, date: todayStr() });
         break;
       case 'caijing':
-        DB.data.caijing.push({ id: DB.uid(), title: result.title, cat: result.cat || '大盘', content: result.content||'', dur: result.dur||0, marked: result.marked||false, date: todayStr() });
+        // 触发自动抓取最新财经新闻
+        setTimeout(() => Caijing.fetchAll(), 300);
         break;
       case 'stock':
-        const stock = DB.data.stocks.find(s => s.code === result.code || s.name.includes(result.name));
-        if (stock) {
-          const lastRec = stock.records.length ? stock.records[stock.records.length - 1] : null;
-          const prevClose = lastRec ? lastRec.close : stock.costPrice;
-          const chg = prevClose ? ((result.close - prevClose) / prevClose * 100) : (result.chg || 0);
-          const pnl = (result.close - stock.costPrice) * stock.holding;
-          stock.records.push({ date: todayStr(), close: result.close, chg: +chg.toFixed(2), pnl: +pnl.toFixed(2) });
-        } else {
-          toast('未找到股票：' + (result.name || result.code) + '，请先在股票看板添加');
-          return;
-        }
+        // 触发自动刷新所有股票行情
+        setTimeout(() => Stock.refreshAll(), 300);
         break;
     }
     DB.save();
@@ -1195,21 +1376,9 @@ const AI = {
         return { module:'xving', module_name: xvMatch || '言语', num: num?parseInt(num):0, dur: dur?parseInt(dur):0, err: err?parseInt(err):0 };
       }
     }
-    // 2) 股票：股票名/代码 + 收盘价/涨跌幅
-    // 先匹配"xxx收盘xxx涨x%"
-    const stockPctMatch = text.match(/(.+?)(收盘|现价)?(\d+(?:\.\d+)?)\s*(涨|跌)\s*(\d+(?:\.\d+)?)\s*%/);
-    const stockNameMatch = text.match(/^([一-龥]{2,6})/);
-    const stockCodeMatch = text.match(/(\d{6})/);
-    if ((stockPctMatch || /收盘|现价/.test(text)) && (stockNameMatch || stockCodeMatch)) {
-      const name = stockNameMatch ? stockNameMatch[1] : '';
-      const code = stockCodeMatch ? stockCodeMatch[1] : '';
-      const closeM = text.match(/(收盘|现价)?(\d+(?:\.\d+)?)/);
-      const close = closeM ? parseFloat(closeM[2]) : 0;
-      const chgM = text.match(/[涨跌]\s*(\d+(?:\.\d+)?)\s*%/);
-      const chg = chgM ? parseFloat(chgM[1]) : 0;
-      if (close > 0) {
-        return { module:'stock', name, code, close, chg };
-      }
+    // 2) 股票：刷新行情 / 查看股票
+    if (/刷新股票|刷新行情|查看股票|股票行情|实时行情|今天股票|股票怎么样|持仓分析/.test(text)) {
+      return { module:'stock', action:'refresh' };
     }
     // 3) 时政：会议/政策/科技/民生/国际
     const szCats = {'会议':'会议','政策':'政策','科技':'科技','民生':'民生','国际':'国际'};
@@ -1223,15 +1392,9 @@ const AI = {
       const pointsM = text.match(/考点[：:](.+)/);
       return { module:'shizheng', title, cat: szCatMatch || '会议', content: text, points: pointsM ? pointsM[1] : '', dur: dur?parseInt(dur):0, fav };
     }
-    // 4) 财经：大盘/行业政策/经济数据/降准/降息/CPI/GDP
-    const cjCats = {'大盘':'大盘','行业政策':'行业政策','经济数据':'经济数据'};
-    const cjCatMatch = Object.keys(cjCats).find(c => text.includes(c));
-    if (cjCatMatch || /大盘|降准|降息|CPI|GDP|LPR|财经|股市|板块|经济数据|行业政策/.test(text)) {
-      let title = text.replace(/财经|资讯|录入/, '').trim().slice(0, 30);
-      if (!title) title = '财经资讯';
-      const dur = (text.match(/(\d+)\s*(分钟|分|min)/) || [])[1];
-      const marked = /重点|关注|重要/.test(text);
-      return { module:'caijing', title, cat: cjCatMatch || '大盘', content: text, dur: dur?parseInt(dur):0, marked };
+    // 4) 财经：刷新新闻（改为触发自动抓取）
+    if (/刷新新闻|抓取财经|最新财经|今日财经/.test(text)) {
+      return { module:'caijing', action:'fetch' };
     }
     // 5) 公基：法律/政治/经济/公文/文史/科技 + 学/背
     const gjCats = {'法律':'法律','政治':'政治','经济':'经济','公文':'公文','文史':'文史','科技':'科技'};
@@ -1273,8 +1436,7 @@ function showWeekly() {
   const szFav = wSz.filter(x => x.fav).length;
   // 4. 财经
   const wCj = d.caijing.filter(x => wDates.includes(x.date));
-  const cjDur = wCj.reduce((a,b)=>a+b.dur,0);
-  const cjMarked = wCj.filter(x => x.marked).length;
+  const cjMarked = wCj.filter(x => x.fav).length;
   // 5. 股票
   const stCount = d.stocks.length;
   let stTotalPnl = 0;
@@ -1304,8 +1466,9 @@ function showWeekly() {
   else if (wSz.length > 0) insights.push(`📰 本周时政 ${wSz.length} 条，建议每天 1-2 条，重点标注考点。`);
   else insights.push('📰 本周还没有时政记录，时政是公考必考项，建议每天花 10 分钟浏览新闻。');
 
-  if (wCj.length >= 3) insights.push(`💹 本周财经资讯 ${wCj.length} 条，重点 ${cjMarked} 条，市场敏感度不错。`);
-  else insights.push('💹 本周财经资讯较少，建议关注大盘走势和重要经济数据。');
+  if (wCj.length >= 10) insights.push(`💹 本周自动抓取 ${wCj.length} 条财经资讯，收藏 ${cjMarked} 条，市场嗅觉很敏锐！`);
+  else if (wCj.length > 0) insights.push(`💹 本周抓取 ${wCj.length} 条财经资讯，建议点「刷新新闻」获取更多实时资讯。`);
+  else insights.push('💹 本周还没有抓取财经资讯，点击财经页的「刷新新闻」按钮自动获取最新资讯。');
 
   if (stCount > 0) insights.push(`📈 持仓 ${stCount} 只股票，本周累计盈亏 ${stTotalPnl>=0?'+':''}¥${stTotalPnl.toFixed(0)}。${stTotalPnl>=0?'盈利状态，注意止盈':'亏损状态，理性看待长期投资'}。`);
 
@@ -1339,8 +1502,8 @@ function showWeekly() {
       <h4>💹 财经汇总</h4>
       <div class="wa-grid">
         <div class="wa-card"><div class="l">本周资讯</div><div class="v">${wCj.length}条</div></div>
-        <div class="wa-card"><div class="l">浏览时长</div><div class="v">${cjDur}分</div></div>
-        <div class="wa-card"><div class="l">重点标记</div><div class="v">${cjMarked}条</div></div>
+        <div class="wa-card"><div class="l">总资讯数</div><div class="v">${d.caijing.length}条</div></div>
+        <div class="wa-card"><div class="l">已收藏</div><div class="v">${cjMarked}条</div></div>
       </div>
     </div>
     <div class="wa-section">
@@ -1422,37 +1585,13 @@ if ('serviceWorker' in navigator) {
 
 // ---------- 初始渲染 ----------
 Xving.render();
-console.log('✅ 公考财经自律管理工作台 已启动');
-
-// ---------- PWA: 安装提示（安卓 Chrome 会弹出"安装应用"按钮）----------
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  showInstallBtn();
-});
-function showInstallBtn() {
-  if (document.getElementById('pwaInstallBtn')) return;
-  const btn = document.createElement('div');
-  btn.id = 'pwaInstallBtn';
-  btn.style.cssText = 'position:fixed;right:24px;bottom:96px;background:#34c759;color:#fff;padding:10px 16px;border-radius:12px;box-shadow:0 4px 14px rgba(52,199,89,.4);font-size:14px;font-weight:600;z-index:98;cursor:pointer;display:flex;align-items:center;gap:6px;';
-  btn.innerHTML = '📲 安装到桌面';
-  btn.onclick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') toast('✅ 正在安装，请查看桌面');
-    deferredPrompt = null;
-    btn.remove();
-  };
-  document.body.appendChild(btn);
-  setTimeout(() => { if (btn.parentNode) btn.remove(); }, 15000);
+// 启动财经新闻自动抓取定时器（每 30 分钟刷新一次）
+Caijing.startAutoFetch();
+// 如果已有数据，不自动抓取；首次使用时自动抓取一次
+if (DB.data.caijing.length === 0) {
+  setTimeout(() => Caijing.fetchAll(), 2000);
 }
-window.addEventListener('appinstalled', () => {
-  toast('🎉 已安装到桌面！');
-  const b = document.getElementById('pwaInstallBtn');
-  if (b) b.remove();
-});
+console.log('✅ 公考财经自律管理工作台 已启动');
 </script>
 </body>
 </html>
